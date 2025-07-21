@@ -1,0 +1,36 @@
+_commit="e0ce0c8"
+
+pkgname="gzinject"
+pkgver=0
+pkgrel=1
+pkgdesc="CLI Wii WAD editing utility"
+arch=("x86_64")
+url="https://github.com/PracticeROM/gzinject"
+license=("GPL-3.0-or-later")
+groups=("practicerom-dev")
+depends=("glibc")
+makedepends=("git")
+options=("!debug")
+source=("gzinject::git+${url}.git#commit=${_commit}")
+sha512sums=("SKIP")
+
+pkgver() {
+	rev=$(git -C gzinject rev-list --count "${_commit}")
+	printf "r%s.%s" "${rev}" "${_commit}"
+}
+
+prepare() {
+	cd gzinject && ./configure \
+		--prefix=/usr \
+		CFLAGS="${CFLAGS}" \
+		CXXFLAGS="${CXXFLAGS}" \
+		LDFLAGS="${LDFLAGS}"
+}
+
+build() {
+	make -C gzinject
+}
+
+package() {
+	make DESTDIR="${pkgdir}" -C gzinject install
+}

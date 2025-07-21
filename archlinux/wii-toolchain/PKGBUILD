@@ -1,0 +1,147 @@
+_commit="0279cc9"
+_binutils_ver=2.44
+_gcc_ver=15.1.0
+_newlib_ver=4.5.0.20241231
+_gdb_ver=16.3
+
+pkgbase="wii-toolchain"
+pkgname=(
+	"powerpc-eabi-binutils"
+	"powerpc-eabi-gcc"
+	"powerpc-eabi-gcc-libs"
+	"powerpc-eabi-newlib"
+	"powerpc-eabi-gdb"
+)
+pkgver=0
+pkgrel=1
+arch=("x86_64")
+url="https://github.com/PracticeROM/wii-toolchain"
+groups=("practicerom-dev")
+makedepends=(
+	"curl" "diffutils" "git" "tar"
+	"expat" "guile" "ncurses" "python" "xxhash" "xz"
+)
+options=("!debug")
+source=("wii-toolchain::git+${url}.git#commit=${_commit}")
+sha512sums=("SKIP")
+
+pkgver() {
+	rev=$(git -C wii-toolchain rev-list --count "${_commit}")
+	printf "r%s.%s" "${rev}" "${_commit}"
+}
+
+prepare() {
+	cd wii-toolchain && ./configure \
+		--prefix=/usr \
+		--with-configure-toolchain="--libexecdir='\${exec_prefix}/lib'" \
+		BINUTILS_VERSION="binutils-${_binutils_ver}" \
+		GCC_VERSION="gcc-${_gcc_ver}" \
+		NEWLIB_VERSION="newlib-${_newlib_ver}" \
+		GDB_VERSION="gdb-${_gdb_ver}" \
+		CFLAGS="${CFLAGS} -Wno-error=format-security" \
+		CXXFLAGS="${CXXFLAGS} -Wno-error=format-security" \
+		LDFLAGS="${LDFLAGS}"
+}
+
+build() {
+	CFLAGS="${CFLAGS} -Wno-error=format-security"
+	CXXFLAGS="${CXXFLAGS} -Wno-error=format-security"
+
+	make -C wii-toolchain toolchain-all
+}
+
+package_powerpc-eabi-binutils() {
+	pkgdesc="GNU Binutils targeting powerpc-eabi"
+	license=("GPL")
+	depends=(
+		"gcc-libs"
+		"glibc"
+		"libelf"
+		"zstd"
+	)
+	options=("staticlibs" "!emptydirs")
+
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-binutils
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-gas
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-ld
+
+	rm -r "${pkgdir}"/usr/lib/ # bfd-plugins/libdep.so
+	rm -r "${pkgdir}"/usr/share/info/
+}
+
+package_powerpc-eabi-gcc() {
+	pkgdesc="GCC targeting powerpc-eabi"
+	license=("GPL-3.0-with-GCC-exception" "GFDL-1.3-or-later")
+	depends=(
+		"gcc-libs"
+		"glibc"
+		"zstd"
+		"powerpc-eabi-binutils=${pkgver}-${pkgrel}"
+		"powerpc-eabi-gcc-libs=${pkgver}-${pkgrel}"
+		"powerpc-eabi-newlib=${pkgver}-${pkgrel}"
+	)
+	options=("staticlibs" "!emptydirs")
+
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-gcc
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-c++tools
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-lto-plugin
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-libcc1
+
+	rm "${pkgdir}"/usr/lib/libcc1*
+	rm -r "${pkgdir}"/usr/share/info/
+	rm -r "${pkgdir}"/usr/share/man/man3/
+	rm -r "${pkgdir}"/usr/share/man/man7/
+}
+
+package_powerpc-eabi-gcc-libs() {
+	pkgdesc="Libraries for GCC targeting powerpc-eabi"
+	arch=("any")
+	license=("GPL-3.0-with-GCC-exception" "GFDL-1.3-or-later")
+	options=("!strip" "staticlibs" "!emptydirs")
+
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-target-libstdc++-v3
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-target-libssp
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-target-libgcc
+
+	rm -r "${pkgdir}"/usr/share/ # gcc-${_gcc_ver}/python/libstdcxx/
+	rm "${pkgdir}"/usr/lib/gcc/powerpc-eabi/"${_gcc_ver}"/include/unwind.h
+}
+
+package_powerpc-eabi-newlib() {
+	pkgdesc="Newlib targeting powerpc-eabi"
+	arch=("any")
+	license=("BSD")
+	options=("!strip" "staticlibs" "!emptydirs")
+
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-target-newlib
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-target-libgloss
+
+	rm -r "${pkgdir}"/usr/share/
+}
+
+package_powerpc-eabi-gdb() {
+	pkgdesc="GDB targeting powerpc-eabi"
+	license=("GPL-3.0-or-later" "LGPL-3.0-or-later")
+	depends=(
+		"bash"
+		"expat"
+		"gcc-libs"
+		"gdb-common=${_gdb_ver}"
+		"glibc"
+		"guile"
+		"libelf"
+		"ncurses"
+		"python"
+		"zstd"
+		"xxhash"
+		"xz"
+	)
+	options=("staticlibs" "!emptydirs")
+
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-gdb
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-sim
+
+	rm -r "${pkgdir}"/usr/include/
+	rm -r "${pkgdir}"/usr/share/gdb/
+	rm -r "${pkgdir}"/usr/share/info/
+}

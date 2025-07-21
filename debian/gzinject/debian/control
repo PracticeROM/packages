@@ -1,0 +1,15 @@
+Source: gzinject
+Maintainer: glank <glank@practicerom.com>
+Section: devel
+Priority: optional
+Build-Depends: git
+Standards-Version: 4.5.1
+Homepage: https://github.com/PracticeROM/gzinject
+
+Package: gzinject
+Architecture: amd64
+Section: devel
+Priority: optional
+Depends: libc6
+Description: CLI Wii WAD editing utility
+Homepage: https://github.com/PracticeROM/gzinject

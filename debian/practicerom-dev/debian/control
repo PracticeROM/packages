@@ -1,0 +1,18 @@
+Source: practicerom-dev
+Maintainer: glank <glank@practicerom.com>
+Section: devel
+Priority: optional
+Standards-Version: 4.5.1
+Homepage: https://github.com/PracticeROM
+
+Package: practicerom-dev
+Architecture: any
+Section: devel
+Priority: optional
+Depends: gzinject, practicerom-tools, mips64-ultra-elf-practicerom-libs,
+ mips64-ultra-elf-binutils, mips64-ultra-elf-gcc, mips64-ultra-elf-gcc-libs,
+ mips64-ultra-elf-newlib, mips64-ultra-elf-gdb,
+ powerpc-eabi-binutils, powerpc-eabi-gcc, powerpc-eabi-gcc-libs,
+ powerpc-eabi-newlib, powerpc-eabi-gdb
+Description: Essential packages for practice rom development
+Homepage: https://github.com/PracticeROM
