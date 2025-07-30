@@ -130,7 +130,7 @@ package_mips64-ultra-elf-practicerom-libs() {
 package_practicerom-tools() {
 	make DESTDIR="${pkgdir}" -C n64 install-strip
 
-	mv "${pkgdir}/usr/bin/gs" "${pkgdir}/usr/bin/n64-gs"
+	mv "${pkgdir}"/usr/bin/gs "${pkgdir}"/usr/bin/n64-gs
 }
 
 ${1}
