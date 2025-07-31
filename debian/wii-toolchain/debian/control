@@ -3,7 +3,6 @@ Maintainer: glank <glank@practicerom.com>
 Section: devel
 Priority: optional
 Build-Depends: curl, diffutils, git, tar,
- libjansson-dev, libusb-1.0-0-dev, liblua5.3-dev, zlib1g-dev,
  libexpat1-dev, guile-3.0-dev, libelf-dev, libncurses-dev, python3, libxxhash-dev, liblzma-dev
 Standards-Version: 4.5.1
 Homepage: https://github.com/PracticeROM/wii-toolchain
