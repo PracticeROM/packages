@@ -1,43 +1,4 @@
-#!/bin/bash
-set -e
+#!/usr/bin/make -f
 
-_commit="e0ce0c8"
-
-pkgname="gzinject"
-pkgrel=1
-url="https://github.com/PracticeROM/gzinject"
-
-pkgver() {
-	rev=$(git -C gzinject rev-list --count "${_commit}")
-	printf "0.r%s.%s" "${rev}" "${_commit}"
-}
-
-clean() {
-	rm -f debian/files
-	rm -rf debian/tmp/
-	rm -rf gzinject/
-}
-
-build() {
-	git clone -- "${url}.git" gzinject
-	git -C gzinject checkout ${_commit}
-
-	(cd gzinject && ./configure --prefix=/usr)
-	make -C gzinject all
-}
-
-binary() {
-	pkgdir="${PWD}"/debian/tmp
-	pkgver="$(pkgver)"
-
-	rm -rf "${pkgdir}"
-	mkdir -p "${pkgdir}"
-	mkdir -p "${pkgdir}"/DEBIAN
-
-	make DESTDIR="${pkgdir}" -C gzinject install
-
-	dpkg-gencontrol -v"${pkgver}-${pkgrel}" -p"${pkgname}"
-	dpkg-deb -b "${pkgdir}" ..
-}
-
-${1}
+%:
+	@bash -ec ". debian/rules.sh; $(@);"

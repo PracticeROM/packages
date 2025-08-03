@@ -2,14 +2,15 @@ Source: n64-ultra
 Maintainer: glank <glank@practicerom.com>
 Section: devel
 Priority: optional
-Build-Depends: curl, diffutils, git, tar,
- libjansson-dev, libusb-1.0-0-dev, liblua5.3-dev, zlib1g-dev,
- libexpat1-dev, guile-3.0-dev, libelf-dev, libncurses-dev, python3, libxxhash-dev, liblzma-dev
+Build-Depends: git, python3:native, tar, texinfo, wget
+Build-Depends-Arch: libjansson-dev, libusb-1.0-0-dev, liblua5.3-dev,
+ zlib1g-dev, libexpat1-dev, guile-3.0-dev, libelf-dev, libncurses-dev,
+ libxxhash-dev, liblzma-dev
 Standards-Version: 4.5.1
 Homepage: https://github.com/glankk/n64
 
 Package: mips64-ultra-elf-binutils
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
 Depends: libc6, libelf1, libgcc-s1, liblzma5
@@ -17,7 +18,7 @@ Description: GNU Binutils targeting mips64-ultra-elf
 Homepage: https://github.com/glankk/n64
 
 Package: mips64-ultra-elf-gcc
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
 Depends: libc6, libgcc-s1, libstdc++6, liblzma5, ${misc:Depends}
@@ -25,36 +26,37 @@ Description: GCC targeting mips64-ultra-elf
 Homepage: https://github.com/glankk/n64
 
 Package: mips64-ultra-elf-gcc-libs
-Architecture: any
+Architecture: all
 Section: devel
 Priority: optional
 Description: Libraries for GCC targeting mips64-ultra-elf
 Homepage: https://github.com/glankk/n64
 
 Package: mips64-ultra-elf-newlib
-Architecture: any
+Architecture: all
 Section: devel
 Priority: optional
 Description: Newlib targeting mips64-ultra-elf
 Homepage: https://github.com/glankk/n64
 
 Package: mips64-ultra-elf-gdb
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
-Depends: bash, guile-3.0, libc6, libelf1, libgcc-s1, libexpat1, libncurses6, libstdc++6, liblzma5, libxxhash0, libzstd1, python3
+Depends: bash, guile-3.0, libc6, libelf1, libgcc-s1, libexpat1, libncurses6,
+ libstdc++6, liblzma5, libxxhash0, libzstd1, python3
 Description: GDB targeting mips64-ultra-elf
 Homepage: https://github.com/glankk/n64
 
 Package: mips64-ultra-elf-practicerom-libs
-Architecture: any
+Architecture: all
 Section: devel
 Priority: optional
 Description: Practicerom development headers and libraries
 Homepage: https://github.com/glankk/n64
 
 Package: practicerom-tools
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
 Depends: libc6, libgcc-s1, libjansson4, libusb-1.0-0, liblua5.3-0, zlib1g

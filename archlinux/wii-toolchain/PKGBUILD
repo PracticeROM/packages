@@ -18,7 +18,7 @@ arch=("x86_64")
 url="https://github.com/PracticeROM/wii-toolchain"
 groups=("practicerom-dev")
 makedepends=(
-	"curl" "diffutils" "git" "tar"
+	"curl" "git" "tar"
 	"expat" "guile" "ncurses" "python" "xxhash" "xz"
 )
 options=("!debug")
@@ -76,13 +76,14 @@ package_powerpc-eabi-gcc() {
 		"gcc-libs"
 		"glibc"
 		"zstd"
-		"powerpc-eabi-binutils=${pkgver}-${pkgrel}"
+		"powerpc-eabi-binutils"
 		"powerpc-eabi-gcc-libs=${pkgver}-${pkgrel}"
 		"powerpc-eabi-newlib=${pkgver}-${pkgrel}"
 	)
 	options=("staticlibs" "!emptydirs")
 
-	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-gcc
+	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-gcc \
+		INSTALL_HEADERS=install-headers
 	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-c++tools
 	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-lto-plugin
 	make DESTDIR="${pkgdir}" -C wii-toolchain toolchain-install-strip-libcc1

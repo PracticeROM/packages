@@ -1,0 +1,155 @@
+on:
+  workflow_call:
+    inputs:
+      packages:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: archlinux:base-devel
+
+    defaults:
+      run:
+        shell: runuser -u pkg -- bash -e {0}
+
+    steps:
+      - name: Update system package index
+        shell: bash -e {0}
+        run: |
+          pacman -Sy --noconfirm
+
+      - name: Install system packages
+        shell: bash -e {0}
+        run: |
+          pacman -S --noconfirm git openssh
+
+      - name: Create user
+        shell: bash -e {0}
+        run: |
+          useradd -m pkg
+          echo 'pkg ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers.d/pkg
+
+      - name: Configure user
+        env:
+          PKG_HOST: ${{ secrets.ARCH_HOST }}
+          PKG_PORT: ${{ secrets.ARCH_PORT }}
+          PKG_KEY: ${{ secrets.ARCH_KEY }}
+        run: |
+          USER=$(whoami)
+          HOME=$(getent passwd ${USER} | cut -d: -f6)
+          mkdir ~/.ssh
+          printf "%s" "${PKG_KEY}" > ~/.ssh/id_rsa
+          ssh-keyscan -t rsa -p "${PKG_PORT}" "${PKG_HOST}" > ~/.ssh/known_hosts
+          chmod 0700 ~/.ssh
+          chmod 0600 ~/.ssh/id_rsa ~/.ssh/known_hosts
+
+      - name: Checkout git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix permissions
+        run: |
+          sudo chown -R pkg:pkg .
+
+      - name: Get changed packages
+        if: ${{ github.event_name == 'push' }}
+        id: changed-packages
+        uses: tj-actions/changed-files@v46.0.5
+        with:
+          files: archlinux/*/**
+          dir_names: true
+          dir_names_max_depth: 2
+
+      - name: Get list of packages to build
+        id: list-packages
+        env:
+          INPUT_PACKAGES: ${{ inputs.packages }}
+          CHANGED_PACKAGES: ${{ steps.changed-packages.outputs.all_changed_files }}
+        run: |
+          sudo chown pkg:pkg ${GITHUB_OUTPUT}
+
+          if [ "${GITHUB_EVENT_NAME}" == push ]; then
+            echo "packages=${CHANGED_PACKAGES}" >> "${GITHUB_OUTPUT}"
+          else
+            top_dir=archlinux
+
+            shopt -s globstar
+            for f in ${INPUT_PACKAGES}; do
+              realpath -ms --relative-to . "${f}" | grep -E -o "^${top_dir}/[^/]+(/|$)" | sed 's#/$##'
+            done | sort | uniq | xargs echo "packages=" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Build packages
+        id: build-packages
+        env:
+          PACKAGES: ${{ steps.list-packages.outputs.packages }}
+        run: |
+          pkg_files=()
+
+          for pkg in ${PACKAGES}; do
+            if [ ! -d ${pkg} ]; then continue; fi
+
+            echo "::group::Build ${pkg}"
+            makepkg -D ${pkg} -sc --noconfirm
+            echo "::endgroup::"
+
+            for file in ${pkg}/*.pkg.*; do
+              if [ ! -f ${file} ]; then continue; fi
+
+              pkg_files+=(${file})
+
+              chmod 0664 ${file}
+            done
+          done
+
+          sudo chown pkg:pkg ${GITHUB_OUTPUT}
+          echo "pkg_files=${pkg_files[@]}" >> "${GITHUB_OUTPUT}"
+
+      - name: Acquire package database
+        if: ${{ steps.build-packages.outputs.pkg_files != '' }}
+        id: acquire-db
+        env:
+          PKG_HOST: ${{ secrets.ARCH_HOST }}
+          PKG_PORT: ${{ secrets.ARCH_PORT }}
+          PKG_USER: ${{ secrets.ARCH_USER }}
+          PKG_ROOT: ${{ secrets.ARCH_ROOT }}
+        run: |
+          ssh -p "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}" \
+            dotlockfile -l "${PKG_ROOT}"/.lock
+
+      - name: Synchronize package database
+        if: ${{ steps.acquire-db.outcome == 'success' }}
+        env:
+          PKG_HOST: ${{ secrets.ARCH_HOST }}
+          PKG_PORT: ${{ secrets.ARCH_PORT }}
+          PKG_USER: ${{ secrets.ARCH_USER }}
+          PKG_ROOT: ${{ secrets.ARCH_ROOT }}
+          PKG_DB: ${{ secrets.ARCH_DB }}
+          PKG_FILES: ${{ steps.build-packages.outputs.pkg_files }}
+        run: |
+          scp -P "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}":"${PKG_ROOT}/${PKG_DB}".{db,files}.tar.gz .
+          repo-add "${PKG_DB}.db.tar.gz" ${PKG_FILES}
+          scp -P "${PKG_PORT}" ${PKG_FILES} "${PKG_USER}@${PKG_HOST}":"${PKG_ROOT}"
+          scp -P "${PKG_PORT}" "${PKG_DB}".{db,files}.tar.gz "${PKG_USER}@${PKG_HOST}":"${PKG_ROOT}"
+
+          for file in ${PKG_FILES} "${PKG_DB}".{db,files}; do
+            ssh -p "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}" gpg --detach-sign --yes "${PKG_ROOT}/$(basename "${file}")"
+          done
+
+      - name: Release package database
+        if: ${{ always() && steps.acquire-db.outcome == 'success' }}
+        env:
+          PKG_HOST: ${{ secrets.ARCH_HOST }}
+          PKG_PORT: ${{ secrets.ARCH_PORT }}
+          PKG_USER: ${{ secrets.ARCH_USER }}
+          PKG_ROOT: ${{ secrets.ARCH_ROOT }}
+        run: |
+          ssh -p "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}" \
+            dotlockfile -u "${PKG_ROOT}"/.lock

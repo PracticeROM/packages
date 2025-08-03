@@ -2,13 +2,14 @@ Source: wii-toolchain
 Maintainer: glank <glank@practicerom.com>
 Section: devel
 Priority: optional
-Build-Depends: curl, diffutils, git, tar,
- libexpat1-dev, guile-3.0-dev, libelf-dev, libncurses-dev, python3, libxxhash-dev, liblzma-dev
+Build-Depends: git, python3:native, tar, texinfo, wget
+Build-Depends-Arch: libexpat1-dev, guile-3.0-dev, libelf-dev, libncurses-dev,
+ libxxhash-dev, liblzma-dev
 Standards-Version: 4.5.1
 Homepage: https://github.com/PracticeROM/wii-toolchain
 
 Package: powerpc-eabi-binutils
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
 Depends: libc6, libelf1, libgcc-s1, liblzma5
@@ -16,7 +17,7 @@ Description: GNU Binutils targeting powerpc-eabi
 Homepage: https://github.com/PracticeROM/wii-toolchain
 
 Package: powerpc-eabi-gcc
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
 Depends: libc6, libgcc-s1, libstdc++6, liblzma5, ${misc:Depends}
@@ -24,23 +25,24 @@ Description: GCC targeting powerpc-eabi
 Homepage: https://github.com/PracticeROM/wii-toolchain
 
 Package: powerpc-eabi-gcc-libs
-Architecture: any
+Architecture: all
 Section: devel
 Priority: optional
 Description: Libraries for GCC targeting powerpc-eabi
 Homepage: https://github.com/PracticeROM/wii-toolchain
 
 Package: powerpc-eabi-newlib
-Architecture: any
+Architecture: all
 Section: devel
 Priority: optional
 Description: Newlib targeting powerpc-eabi
 Homepage: https://github.com/PracticeROM/wii-toolchain
 
 Package: powerpc-eabi-gdb
-Architecture: amd64
+Architecture: any
 Section: devel
 Priority: optional
-Depends: bash, guile-3.0, libc6, libelf1, libgcc-s1, libexpat1, libncurses6, libstdc++6, liblzma5, libxxhash0, libzstd1, python3
+Depends: bash, guile-3.0, libc6, libelf1, libgcc-s1, libexpat1, libncurses6,
+ libstdc++6, liblzma5, libxxhash0, libzstd1, python3
 Description: GDB targeting powerpc-eabi
 Homepage: https://github.com/PracticeROM/wii-toolchain

@@ -1,0 +1,213 @@
+on:
+  workflow_call:
+    inputs:
+      packages:
+        required: true
+        type: string
+      arch:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: debian:stable
+
+    defaults:
+      run:
+        shell: runuser -u pkg -- bash -e {0}
+
+    steps:
+      - name: Update system package index
+        shell: bash -e {0}
+        run: |
+          apt-get update
+
+      - name: Install system packages
+        shell: bash -e {0}
+        env:
+          PKG_ARCH: ${{ inputs.arch }}
+        run: |
+          apt-get install -y build-essential git openssh-client sudo
+          if dpkg-architecture -a "${PKG_ARCH}" -c '[ ${DEB_BUILD_GNU_TYPE} != ${DEB_HOST_GNU_TYPE} ]'; then
+            apt-get install -y crossbuild-essential-${PKG_ARCH}
+            dpkg --add-architecture "${PKG_ARCH}"
+            apt-get update
+          fi
+
+      - name: Create user
+        shell: bash -e {0}
+        run: |
+          useradd -m pkg
+          echo 'pkg ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers.d/pkg
+
+      - name: Configure user
+        env:
+          PKG_HOST: ${{ secrets.DEB_HOST }}
+          PKG_PORT: ${{ secrets.DEB_PORT }}
+          PKG_KEY: ${{ secrets.DEB_KEY }}
+        run: |
+          USER=$(whoami)
+          HOME=$(getent passwd ${USER} | cut -d: -f6)
+          mkdir ~/.ssh
+          printf "%s" "${PKG_KEY}" > ~/.ssh/id_rsa
+          ssh-keyscan -t rsa -p "${PKG_PORT}" "${PKG_HOST}" > ~/.ssh/known_hosts
+          chmod 0700 ~/.ssh
+          chmod 0600 ~/.ssh/id_rsa ~/.ssh/known_hosts
+
+      - name: Checkout git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix permissions
+        run: |
+          sudo chown -R pkg:pkg .
+
+      - name: Get changed packages
+        if: ${{ github.event_name == 'push' }}
+        id: changed-packages
+        uses: tj-actions/changed-files@v46.0.5
+        with:
+          files: debian/*/**
+          dir_names: true
+          dir_names_max_depth: 2
+
+      - name: Get list of packages to build
+        id: list-packages
+        env:
+          INPUT_PACKAGES: ${{ inputs.packages }}
+          CHANGED_PACKAGES: ${{ steps.changed-packages.outputs.all_changed_files }}
+        run: |
+          sudo chown pkg:pkg ${GITHUB_OUTPUT}
+
+          if [ "${GITHUB_EVENT_NAME}" == push ]; then
+            echo "packages=${CHANGED_PACKAGES}" >> "${GITHUB_OUTPUT}"
+          else
+            top_dir=debian
+
+            shopt -s globstar
+            for f in ${INPUT_PACKAGES}; do
+              realpath -ms --relative-to . "${f}" | grep -E -o "^${top_dir}/[^/]+(/|$)" | sed 's#/$##'
+            done | sort | uniq | xargs echo "packages=" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Build packages
+        id: build-packages
+        env:
+          PKG_ARCH: ${{ inputs.arch }}
+          PACKAGES: ${{ steps.list-packages.outputs.packages }}
+        run: |
+          top_dir=debian
+          pkg_files=()
+
+          if dpkg-architecture -a "${PKG_ARCH}" -c '[ ${DEB_BUILD_GNU_TYPE} != ${DEB_HOST_GNU_TYPE} ]'; then
+            build=any
+          else
+            build=binary
+          fi
+
+          buildenv=$(dpkg-architecture -a "${PKG_ARCH}" -s)
+
+          for pkg in ${PACKAGES}; do
+            if [ ! -d ${pkg} ]; then continue; fi
+
+            echo "::group::Build ${pkg}"
+
+            (cd ${pkg} && sudo apt-get build-dep -y -a "${PKG_ARCH}" .)
+
+            if [ ${build} = all ]; then
+              (cd ${pkg} && dpkg-checkbuilddeps -a "${PKG_ARCH}" -A)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules clean)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules build-indep)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules binary-indep)
+              (cd ${pkg} && eval "${buildenv}" 6& fakeroot debian/rules clean)
+            elif [ ${build} = any ]; then
+              (cd ${pkg} && dpkg-checkbuilddeps -a "${PKG_ARCH}" -B)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules clean)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules build-arch)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules binary-arch)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules clean)
+            elif [ ${build} = binary ]; then
+              (cd ${pkg} && dpkg-checkbuilddeps -a "${PKG_ARCH}")
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules clean)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules build)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules binary)
+              (cd ${pkg} && eval "${buildenv}" && fakeroot debian/rules clean)
+            fi
+
+            echo "::endgroup::"
+          done
+
+          for file in "${top_dir}"/*.deb; do
+            if [ ! -f ${file} ]; then continue; fi
+
+            pkg_files+=(${file})
+
+            chmod 0664 ${file}
+          done
+
+          sudo chown pkg:pkg ${GITHUB_OUTPUT}
+          echo "pkg_files=${pkg_files[@]}" >> "${GITHUB_OUTPUT}"
+
+      - name: Acquire package database
+        if: ${{ steps.build-packages.outputs.pkg_files != '' }}
+        id: acquire-db
+        env:
+          PKG_HOST: ${{ secrets.DEB_HOST }}
+          PKG_PORT: ${{ secrets.DEB_PORT }}
+          PKG_USER: ${{ secrets.DEB_USER }}
+          PKG_ROOT: ${{ secrets.DEB_ROOT }}
+          PKG_DIST: ${{ secrets.DEB_DIST }}
+        run: |
+          ssh -p "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}" \
+            dotlockfile -l "${PKG_ROOT}"/dists/"${PKG_DIST}"/.lock
+
+      - name: Synchronize package database
+        if: ${{ steps.acquire-db.outcome == 'success' }}
+        env:
+          PKG_HOST: ${{ secrets.DEB_HOST }}
+          PKG_PORT: ${{ secrets.DEB_PORT }}
+          PKG_USER: ${{ secrets.DEB_USER }}
+          PKG_ROOT: ${{ secrets.DEB_ROOT }}
+          PKG_DIST: ${{ secrets.DEB_DIST }}
+          PKG_COMP: ${{ secrets.DEB_COMP }}
+          PKG_ARCH: ${{ inputs.arch }}
+          PKG_FILES: ${{ steps.build-packages.outputs.pkg_files }}
+        run: |
+          dist_root="${PKG_ROOT}"/dists/"${PKG_DIST}"
+          comp_root="${dist_root}"/"${PKG_COMP}"
+
+          for pkg in ${PKG_FILES}; do
+            arch=$(echo ${pkg} | sed -E 's/.*_([a-zA-Z0-9_]+)\.deb.*/\1/')
+            scp -P "${PKG_PORT}" ${pkg} "${PKG_USER}@${PKG_HOST}":"${comp_root}"/binary-"${arch}"
+          done
+
+          ssh -p "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}" sh -es << EOF
+            cd "${PKG_ROOT}"
+            for pkg_dir in dists/"${PKG_DIST}"/"${PKG_COMP}"/*; do
+              dpkg-scanpackages -m "\${pkg_dir}" > "\${pkg_dir}"/Packages
+            done
+
+            cd "${dist_root}"
+            rm -f Release InRelease
+            cat Release.header > Release
+            apt-ftparchive release . >> Release
+            gpg --output InRelease --digest-algo SHA512 --clearsign Release
+          EOF
+
+      - name: Release package database
+        if: ${{ always() && steps.acquire-db.outcome == 'success' }}
+        env:
+          PKG_HOST: ${{ secrets.DEB_HOST }}
+          PKG_PORT: ${{ secrets.DEB_PORT }}
+          PKG_USER: ${{ secrets.DEB_USER }}
+          PKG_ROOT: ${{ secrets.DEB_ROOT }}
+          PKG_DIST: ${{ secrets.DEB_DIST }}
+        run: |
+          ssh -p "${PKG_PORT}" "${PKG_USER}@${PKG_HOST}" \
+            dotlockfile -u "${PKG_ROOT}"/dists/"${PKG_DIST}"/.lock

@@ -4,39 +4,49 @@ _gcc_ver=15.1.0
 _newlib_ver=4.5.0.20241231
 _gdb_ver=16.3
 
-pkgbase="n64-ultra"
-pkgname=(
+pkgname_arch=(
 	"mips64-ultra-elf-binutils"
 	"mips64-ultra-elf-gcc"
-	"mips64-ultra-elf-gcc-libs"
-	"mips64-ultra-elf-newlib"
 	"mips64-ultra-elf-gdb"
-	"mips64-ultra-elf-practicerom-libs"
 	"practicerom-tools"
 )
-pkgver=0
-pkgrel=1
-arch=("x86_64")
-url="https://github.com/glankk/n64"
-groups=("practicerom-dev")
-makedepends=(
-	"curl" "git" "tar"
-	"jansson" "libusb" "lua" "zlib"
-	"expat" "guile" "ncurses" "python" "xxhash" "xz"
+pkgname_indep=(
+	"mips64-ultra-elf-gcc-libs"
+	"mips64-ultra-elf-newlib"
+	"mips64-ultra-elf-practicerom-libs"
 )
-options=("!debug")
-source=("n64::git+${url}.git#commit=${_commit}")
-sha512sums=("SKIP")
+pkgrel=1
+url="https://github.com/glankk/n64"
 
 pkgver() {
 	rev=$(git -C n64 rev-list --count "${_commit}")
-	printf "r%s.%s" "${rev}" "${_commit}"
+	printf "0.r%s.%s" "${rev}" "${_commit}"
+}
+
+clean() {
+	rm -f debian/files
+	rm -rf debian/tmp/
+	rm -rf n64/
 }
 
 prepare() {
-	cd n64 && ./configure \
+	git clone -- "${url}.git" n64
+	git -C n64 checkout "${_commit}"
+
+	build=$(dpkg-architecture -q DEB_BUILD_GNU_TYPE)
+	host=$(dpkg-architecture -q DEB_HOST_GNU_TYPE)
+
+	configure_toolchain=(
+		"--libexecdir='\${exec_prefix}/lib'"
+		"--build=${build}"
+		"--host=${host}"
+	)
+
+	(cd n64 && ./configure \
 		--prefix=/usr \
-		--with-configure-toolchain="--libexecdir='\${exec_prefix}/lib'" \
+		--build=${build} \
+		--host=${host} \
+		--with-configure-toolchain="${configure_toolchain[*]}" \
 		BINUTILS_VERSION="binutils-${_binutils_ver}" \
 		GCC_VERSION="gcc-${_gcc_ver}" \
 		NEWLIB_VERSION="newlib-${_newlib_ver}" \
@@ -44,27 +54,82 @@ prepare() {
 		CFLAGS="${CFLAGS} -Wno-error=format-security" \
 		CXXFLAGS="${CXXFLAGS} -Wno-error=format-security" \
 		LDFLAGS="${LDFLAGS}"
+	)
 }
 
 build() {
-	CFLAGS="${CFLAGS} -Wno-error=format-security"
-	CXXFLAGS="${CXXFLAGS} -Wno-error=format-security"
+	prepare
 
 	make -C n64 all
 	make -C n64 toolchain-all
 }
 
-package_mips64-ultra-elf-binutils() {
-	pkgdesc="GNU Binutils targeting mips64-ultra-elf"
-	license=("GPL")
-	depends=(
-		"gcc-libs"
-		"glibc"
-		"libelf"
-		"zstd"
-	)
-	options=("staticlibs" "!emptydirs")
+build-arch() {
+	prepare
 
+	make -C n64 all
+	make -C n64 toolchain-all-binutils
+	make -C n64 toolchain-all-gas
+	make -C n64 toolchain-all-ld
+	make -C n64 toolchain-all-gcc \
+		TARGET-gcc=gcc-cross
+	make -C n64 toolchain-all-gcc \
+		TARGET-gcc="specs selftest" GCC_FOR_TARGET=true
+	make -C n64 toolchain-all-gcc
+	make -C n64 toolchain-all-c++tools
+	make -C n64 toolchain-all-lto-plugin
+	make -C n64 toolchain-all-libcc1
+	make -C n64 toolchain-all-gdb
+	make -C n64 toolchain-all-sim
+}
+
+build-indep() {
+	prepare
+
+	make -C n64 toolchain-all-target-libstdc++-v3
+	make -C n64 toolchain-all-target-libssp
+	make -C n64 toolchain-all-target-libgcc
+	make -C n64 toolchain-all-target-newlib
+	make -C n64 toolchain-all-target-libgloss
+}
+
+package() {
+	pkgdir="${PWD}"/debian/tmp
+	pkgver=$(pkgver)
+
+	for pkg in "${@}"; do
+		rm -rf "${pkgdir}"
+		mkdir -p "${pkgdir}"
+		mkdir -p "${pkgdir}"/DEBIAN
+
+		depends=()
+
+		package_${pkg}
+
+		depends_value=
+		for d in "${depends[@]}"; do
+			depends_value="${depends_value}${depends_value:+, }${d}"
+		done
+
+		dpkg-gencontrol -v"${pkgver}-${pkgrel}" -p"${pkg}" -V"misc:Depends=${depends_value}"
+		dpkg-deb -b "${pkgdir}" ..
+	done
+}
+
+binary() {
+	binary-arch
+	binary-indep
+}
+
+binary-arch() {
+	package "${pkgname_arch[@]}"
+}
+
+binary-indep() {
+	package "${pkgname_indep[@]}"
+}
+
+package_mips64-ultra-elf-binutils() {
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-binutils
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-gas
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-ld
@@ -74,17 +139,11 @@ package_mips64-ultra-elf-binutils() {
 }
 
 package_mips64-ultra-elf-gcc() {
-	pkgdesc="GCC targeting mips64-ultra-elf"
-	license=("GPL-3.0-with-GCC-exception" "GFDL-1.3-or-later")
 	depends=(
-		"gcc-libs"
-		"glibc"
-		"zstd"
 		"mips64-ultra-elf-binutils"
-		"mips64-ultra-elf-gcc-libs=${pkgver}-${pkgrel}"
-		"mips64-ultra-elf-newlib=${pkgver}-${pkgrel}"
+		"mips64-ultra-elf-gcc-libs (= ${pkgver}-${pkgrel})"
+		"mips64-ultra-elf-newlib (= ${pkgver}-${pkgrel})"
 	)
-	options=("staticlibs" "!emptydirs")
 
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-gcc \
 		INSTALL_HEADERS=install-headers
@@ -96,28 +155,20 @@ package_mips64-ultra-elf-gcc() {
 	rm -r "${pkgdir}"/usr/share/info/
 	rm -r "${pkgdir}"/usr/share/man/man3/
 	rm -r "${pkgdir}"/usr/share/man/man7/
+	find "${pkgdir}" -type f -name '*.la' -delete
 }
 
 package_mips64-ultra-elf-gcc-libs() {
-	pkgdesc="Libraries for GCC targeting mips64-ultra-elf"
-	arch=("any")
-	license=("GPL-3.0-with-GCC-exception" "GFDL-1.3-or-later")
-	options=("!strip" "staticlibs" "!emptydirs")
-
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-target-libstdc++-v3
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-target-libssp
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-target-libgcc
 
 	rm -r "${pkgdir}"/usr/share/ # gcc-${_gcc_ver}/python/libstdcxx/
 	rm "${pkgdir}"/usr/lib/gcc/mips64-ultra-elf/"${_gcc_ver}"/include/unwind.h
+	find "${pkgdir}" -type f -name '*.la' -delete
 }
 
 package_mips64-ultra-elf-newlib() {
-	pkgdesc="Newlib targeting mips64-ultra-elf"
-	arch=("any")
-	license=("BSD")
-	options=("!strip" "staticlibs" "!emptydirs")
-
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-target-newlib
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-target-libgloss
 
@@ -125,26 +176,14 @@ package_mips64-ultra-elf-newlib() {
 }
 
 package_mips64-ultra-elf-gdb() {
-	pkgdesc="GDB targeting mips64-ultra-elf"
-	license=("GPL-3.0-or-later" "LGPL-3.0-or-later")
-	depends=(
-		"bash"
-		"expat"
-		"gcc-libs"
-		"gdb-common=${_gdb_ver}"
-		"glibc"
-		"guile"
-		"libelf"
-		"ncurses"
-		"python"
-		"zstd"
-		"xxhash"
-		"xz"
+	sim_STRIP=$(
+		grep "^STRIP = " n64/build-toolchain/sim/Makefile |
+		sed "s/STRIP = //"
 	)
-	options=("staticlibs" "!emptydirs")
 
 	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-gdb
-	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-sim
+	make DESTDIR="${pkgdir}" -C n64 toolchain-install-strip-sim \
+		STRIPPROG="${sim_STRIP}"
 
 	rm -r "${pkgdir}"/usr/include/
 	rm -r "${pkgdir}"/usr/share/gdb/
@@ -152,25 +191,10 @@ package_mips64-ultra-elf-gdb() {
 }
 
 package_mips64-ultra-elf-practicerom-libs() {
-	pkgdesc="Practicerom development headers and libraries"
-	arch=("any")
-	options=("!strip" "staticlibs" "!emptydirs")
-
 	make DESTDIR="${pkgdir}" -C n64 install-sys
 }
 
 package_practicerom-tools() {
-	pkgdesc="Practicerom development tools"
-	depends=(
-		"gcc-libs"
-		"glibc"
-		"jansson"
-		"libusb"
-		"lua"
-		"zlib"
-	)
-	options=("staticlibs" "!emptydirs")
-
 	make DESTDIR="${pkgdir}" -C n64 install-strip
 
 	mv "${pkgdir}"/usr/bin/gs "${pkgdir}"/usr/bin/n64-gs

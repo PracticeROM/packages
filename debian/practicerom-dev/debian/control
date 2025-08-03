@@ -6,7 +6,7 @@ Standards-Version: 4.5.1
 Homepage: https://github.com/PracticeROM
 
 Package: practicerom-dev
-Architecture: any
+Architecture: all
 Section: devel
 Priority: optional
 Depends: gzinject, practicerom-tools, mips64-ultra-elf-practicerom-libs,

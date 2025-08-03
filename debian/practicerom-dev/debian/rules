@@ -1,24 +1,4 @@
-#!/bin/bash
-set -e
+#!/usr/bin/make -f
 
-clean() {
-	rm -f debian/files
-	rm -rf debian/tmp/
-}
-
-build() {
-	return
-}
-
-binary() {
-	pkgdir="${PWD}"/debian/tmp
-
-	rm -rf "${pkgdir}"
-	mkdir -p "${pkgdir}"
-	mkdir -p "${pkgdir}"/DEBIAN
-
-	dpkg-gencontrol
-	dpkg-deb -b "${pkgdir}" ..
-}
-
-${1}
+%:
+	@bash -ec ". debian/rules.sh; $(@);"
