@@ -1,3 +1,5 @@
+name: Deploy Arch Linux packages
+
 on:
   workflow_call:
     inputs:
