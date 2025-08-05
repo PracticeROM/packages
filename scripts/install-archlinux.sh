@@ -8,8 +8,7 @@ install_repository() {
 
 	pacman-key --init
 
-	(curl "${gpg_url}" || wget -O - "${gpg_url}") |
-		tee -p >(pacman-key --add - >/dev/null) |
+	curl "${gpg_url}" | tee -p >(pacman-key --add - >/dev/null) |
 		gpg --with-colons --with-fingerprint --show-key - |
 		awk -F: '$1=="fpr" {print($10)}' | head -n 1 |
 		xargs pacman-key --lsign

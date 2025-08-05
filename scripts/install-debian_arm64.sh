@@ -10,7 +10,7 @@ install_repository() {
 	comp="main"
 	sources_file="/etc/apt/sources.list.d/practicerom.list"
 
-	curl -o "${gpg_key}" "${gpg_url}" || wget -O "${gpg_key}" "${gpg_url}"
+	curl -o "${gpg_key}" "${gpg_url}"
 
 	echo "deb [arch=${arch} signed-by=${gpg_key}] ${pkg_url} ${dist} ${comp}" > "${sources_file}"
 
