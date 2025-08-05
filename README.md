@@ -32,20 +32,22 @@ List of upstream repositories and corresponding binary packages
 </details>
 
 # Installation
-*Piping downloaded scripts into a root shell is dangerous. Download and inspect
-installation scripts before running them to be safe.*
+*Piping downloaded scripts directly into a root shell is dangerous. To be safe,
+download and inspect installation scripts from the scripts directory and then
+run them manually.*
 
 ## Debian (Ubuntu, WSL)
-1.  Run the following to install the package repository (requires `curl`):
-    -   For architecture amd64:
+1.  Run one of the following to install the package repository for your
+    architecture (requires `curl`):
+    -   amd64
         ```
         sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-debian_amd64.sh)"
         ```
-    -   For architecture arm64:
+    -   arm64
         ```
         sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-debian_arm64.sh)"
         ```
-2.  Install indidiual packages by running e.g.
+2.  Install individual packages by running e.g.
     `sudo apt install mips64-ultra-elf-gcc`, or install all practicerom
     development packages with the `practicerom-dev` metapackge:
     `sudo apt install practicerom-dev`.
@@ -56,6 +58,6 @@ installation scripts before running them to be safe.*
     sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-archlinux.sh)"
     ```
 
-2.  Install indidiual packages with e.g. `sudo pacman -S mips64-ultra-elf-gcc`,
+2.  Install individual packages with e.g. `sudo pacman -S mips64-ultra-elf-gcc`,
     or select practicerom development packages from the `practicerom-dev`
     group: `sudo pacman -S practicerom-dev`.
