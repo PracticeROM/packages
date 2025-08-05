@@ -1,6 +1,5 @@
 # About
-Packages for practicerom development. Available for Debian-based systems and
-Arch Linux.
+Practicerom development packages for Debian-based systems and Arch Linux.
 
 # Packages
 <details>
