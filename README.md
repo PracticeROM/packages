@@ -18,9 +18,9 @@ List of upstream repositories and corresponding binary packages
     -   `practicerom-tools`
 
 -   https://github.com/PracticeROM/wii-toolchain
-    - `powerpc-eabi-binutils`
+    -   `powerpc-eabi-binutils`
     -   `powerpc-eabi-gcc`
-    -   `powerpc-eabi-libs`
+    -   `powerpc-eabi-gcc-libs`
     -   `powerpc-eabi-newlib`
     -   `powerpc-eabi-gdb`
 
