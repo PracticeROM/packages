@@ -1,3 +1,5 @@
+# Maintainer: glank <glank@practicerom.com>
+
 _commit="0279cc9"
 _binutils_ver=2.44
 _gcc_ver=15.1.0
