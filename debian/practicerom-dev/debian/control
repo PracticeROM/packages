@@ -3,7 +3,7 @@ Maintainer: glank <glank@practicerom.com>
 Section: devel
 Priority: optional
 Standards-Version: 4.5.1
-Homepage: https://github.com/PracticeROM
+Homepage: https://github.com/PracticeROM/packages
 
 Package: practicerom-dev
 Architecture: all
@@ -15,4 +15,4 @@ Depends: gzinject, practicerom-tools, mips64-ultra-elf-practicerom-libs,
  powerpc-eabi-binutils, powerpc-eabi-gcc, powerpc-eabi-gcc-libs,
  powerpc-eabi-newlib, powerpc-eabi-gdb
 Description: Essential packages for practice rom development
-Homepage: https://github.com/PracticeROM
+Homepage: https://github.com/PracticeROM/packages
