@@ -65,8 +65,10 @@ jobs:
           fetch-depth: 0
 
       - name: Fix permissions
+        shell: bash -e {0}
         run: |
-          sudo chown -R pkg:pkg .
+          chown -R pkg:pkg .
+          git config --global --add safe.directory "${PWD}"
 
       - name: Get changed packages
         if: ${{ github.event_name == 'push' }}
