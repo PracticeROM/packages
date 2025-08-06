@@ -27,7 +27,7 @@ List of upstream repositories and corresponding binary packages
     -   `gzinject`
 
 -   https://github.com/PracticeROM/packages
-    -   `practicerom-dev` (Debian only)
+    -   `practicerom-dev` (Debian)
 </details>
 
 # Installation
