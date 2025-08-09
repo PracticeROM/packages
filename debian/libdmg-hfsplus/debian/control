@@ -1,0 +1,16 @@
+Source: libdmg-hfsplus
+Maintainer: glank <glank@practicerom.com>
+Section: devel
+Priority: optional
+Build-Depends: cmake, git, libbz2-dev, liblzma-dev, libssl-dev, zlib1g-dev
+Standards-Version: 4.5.1
+Homepage: https://github.com/glankk/libdmg-hfsplus
+
+Package: libdmg-hfsplus
+Architecture: any
+Section: devel
+Priority: optional
+Depends: libc6, libbz2-1.0, liblzma5, libssl3, zlib1g
+Description: Portable libraries and utilities that manipulate HFS+ volumes and
+ Apple's DMG images
+Homepage: https://github.com/glankk/libdmg-hfsplus

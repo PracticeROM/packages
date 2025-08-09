@@ -1,0 +1,38 @@
+# Maintainer: glank <glank@practicerom.com>
+
+_commit="fb17a7b"
+
+pkgname="libdmg-hfsplus"
+pkgver=0
+pkgrel=1
+pkgdesc="Portable libraries and utilities that manipulate HFS+ volumes and Apple's DMG images"
+arch=("x86_64")
+url="https://github.com/glankk/libdmg-hfsplus"
+license=("GPL-3.0-or-later")
+depends=("bzip2" "glibc" "openssl" "xz" "zlib")
+makedepends=(
+	"cmake" "git"
+	"bzip2" "openssl" "xz" "zlib"
+)
+options=("!debug")
+source=("${pkgname}::git+${url}.git#commit=${_commit}")
+sha512sums=("SKIP")
+
+pkgver() {
+	rev=$(git -C "${pkgname}" rev-list --count "${_commit}")
+	printf "r%s.%s" "${rev}" "${_commit}"
+}
+
+prepare() {
+	cmake -S "${pkgname}" -B build \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=/usr
+}
+
+build() {
+	make -C build all
+}
+
+package() {
+	make DESTDIR="${pkgdir}" -C build install/strip
+}
