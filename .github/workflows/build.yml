@@ -1,0 +1,45 @@
+name: Build packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Packages to build'
+        type: string
+        default: 'archlinux/* debian/*'
+        required: true
+      deploy:
+        description: 'Deploy to package repository'
+        type: boolean
+        default: false
+        required: true
+  push:
+    branches:
+      - master
+
+jobs:
+  build-archlinux:
+    name: Build Arch Linux packages
+    uses: ./.github/workflows/build-archlinux.yml
+    secrets: inherit
+    with:
+      packages: ${{ inputs.packages }}
+      deploy: ${{ github.event_name == 'push' || inputs.deploy }}
+
+  build-debian-amd64:
+    name: Build Debian packages (amd64)
+    uses: ./.github/workflows/build-debian.yml
+    secrets: inherit
+    with:
+      packages: ${{ inputs.packages }}
+      arch: amd64
+      deploy: ${{ github.event_name == 'push' || inputs.deploy }}
+
+  build-debian-arm64:
+    name: Build Debian packages (arm64)
+    uses: ./.github/workflows/build-debian.yml
+    secrets: inherit
+    with:
+      packages: ${{ inputs.packages }}
+      arch: arm64
+      deploy: ${{ github.event_name == 'push' || inputs.deploy }}

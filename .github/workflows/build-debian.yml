@@ -1,18 +1,21 @@
-name: Deploy Debian packages
+name: Build Debian packages
 
 on:
   workflow_call:
     inputs:
       packages:
-        required: true
         type: string
+        required: true
       arch:
-        required: true
         type: string
+        required: true
+      deploy:
+        type: boolean
+        required: true
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
+    name: Build Debian packages
 
     runs-on: ubuntu-latest
 
@@ -159,7 +162,7 @@ jobs:
           echo "pkg_files=${pkg_files[@]}" >> "${GITHUB_OUTPUT}"
 
       - name: Acquire package database
-        if: ${{ steps.build-packages.outputs.pkg_files != '' }}
+        if: ${{ inputs.deploy && steps.build-packages.outputs.pkg_files != '' }}
         id: acquire-db
         env:
           PKG_HOST: ${{ secrets.DEB_HOST }}
