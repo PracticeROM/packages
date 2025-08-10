@@ -28,6 +28,9 @@ List of upstream repositories and corresponding binary packages
 
 -   https://github.com/PracticeROM/packages
     -   `practicerom-dev` (Debian)
+
+-   https://github.com/glankk/libdmg-hfsplus
+    -   `libdmg-hfsplus`
 </details>
 
 # Installation
