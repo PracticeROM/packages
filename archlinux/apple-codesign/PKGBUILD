@@ -1,0 +1,36 @@
+# Maintainer: glank <glank@practicerom.com>
+
+pkgname="apple-codesign"
+pkgver=0.29.0
+pkgrel=1
+pkgdesc="Binary code signing for Apple platforms"
+arch=("x86_64")
+url="https://github.com/indygreg/apple-platform-rs"
+groups=("practicerom-dev")
+depends=("glibc")
+makedepends=("git" "rust")
+options=("!debug")
+source=("apple-platform-rs::git+${url}.git#tag=${pkgname}/${pkgver}")
+sha512sums=("SKIP")
+
+build() {
+	CFLAGS=
+	CXXFLAGS=
+
+	(cd apple-platform-rs/"${pkgname}" && cargo build \
+		--profile release \
+		--bin rcodesign
+	)
+}
+
+package() {
+	CFLAGS=
+	CXXFLAGS=
+
+	(cd apple-platform-rs/"${pkgname}" && cargo install \
+		--path . \
+		--root="${pkgdir}"/usr \
+		--profile release \
+		--bin rcodesign
+	)
+}

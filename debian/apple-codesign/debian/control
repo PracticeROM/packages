@@ -1,0 +1,15 @@
+Source: apple-codesign
+Maintainer: glank <glank@practicerom.com>
+Section: devel
+Priority: optional
+Build-Depends: curl, git
+Standards-Version: 4.5.1
+Homepage: https://github.com/indygreg/apple-platform-rs
+
+Package: apple-codesign
+Architecture: any
+Section: devel
+Priority: optional
+Depends: libc6
+Description: Binary code signing for Apple platforms
+Homepage: https://github.com/indygreg/apple-platform-rs
