@@ -31,6 +31,9 @@ List of upstream repositories and corresponding binary packages
 
 -   https://github.com/glankk/libdmg-hfsplus
     -   `libdmg-hfsplus`
+
+-   https://github.com/indygreg/apple-platform-rs
+    -   `apple-codesign`
 </details>
 
 # Installation
