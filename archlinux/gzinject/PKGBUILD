@@ -13,11 +13,11 @@ groups=("practicerom-dev")
 depends=("glibc")
 makedepends=("git")
 options=("!debug")
-source=("gzinject::git+${url}.git#commit=${_commit}")
+source=("${pkgname}::git+${url}.git#commit=${_commit}")
 sha512sums=("SKIP")
 
 pkgver() {
-	rev=$(git -C gzinject rev-list --count "${_commit}")
+	rev=$(git -C "${pkgname}" rev-list --count "${_commit}")
 	printf "r%s.%s" "${rev}" "${_commit}"
 }
 
@@ -30,9 +30,9 @@ prepare() {
 }
 
 build() {
-	make -C gzinject
+	make -C "${pkgname}"
 }
 
 package() {
-	make DESTDIR="${pkgdir}" -C gzinject install
+	make DESTDIR="${pkgdir}" -C "${pkgname}" install
 }

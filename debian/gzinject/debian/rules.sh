@@ -5,24 +5,24 @@ pkgrel=1
 url="https://github.com/PracticeROM/gzinject"
 
 pkgver() {
-	rev=$(git -C gzinject rev-list --count "${_commit}")
+	rev=$(git -C "${pkgname}" rev-list --count "${_commit}")
 	printf "0.r%s.%s" "${rev}" "${_commit}"
 }
 
 clean() {
 	rm -f debian/files
 	rm -rf debian/tmp/
-	rm -rf gzinject/
+	rm -rf "${pkgname}"/
 }
 
 prepare() {
-	git clone -- "${url}.git" gzinject
-	git -C gzinject checkout "${_commit}"
+	git clone -- "${url}.git" "${pkgname}"
+	git -C "${pkgname}" checkout "${_commit}"
 
 	build=$(dpkg-architecture -q DEB_BUILD_GNU_TYPE)
 	host=$(dpkg-architecture -q DEB_HOST_GNU_TYPE)
 
-	(cd gzinject && ./configure \
+	(cd "${pkgname}" && ./configure \
 		--prefix=/usr \
 		--build=${build} \
 		--host=${host}
@@ -36,7 +36,7 @@ build() {
 build-arch() {
 	prepare
 
-	make -C gzinject all
+	make -C "${pkgname}" all
 }
 
 build-indep() {
@@ -55,7 +55,7 @@ binary-arch() {
 	mkdir -p "${pkgdir}"
 	mkdir -p "${pkgdir}"/DEBIAN
 
-	make DESTDIR="${pkgdir}" -C gzinject install
+	make DESTDIR="${pkgdir}" -C "${pkgname}" install
 
 	dpkg-gencontrol -v"${pkgver}-${pkgrel}" -p"${pkgname}"
 	dpkg-deb -b "${pkgdir}" ..
