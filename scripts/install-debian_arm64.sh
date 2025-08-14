@@ -6,7 +6,7 @@ install_repository() {
 	gpg_url="https://practicerom.com/public/packages/debian/practicerom-archive-keyring.gpg"
 	gpg_key="/usr/share/keyrings/practicerom-archive-keyring.gpg"
 	arch="all,arm64"
-	dist="unstable"
+	dist="stable"
 	comp="main"
 	sources_file="/etc/apt/sources.list.d/practicerom.list"
 
