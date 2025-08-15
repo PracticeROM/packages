@@ -2,7 +2,7 @@
 
 pkgname="apple-codesign"
 pkgver=0.29.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Binary code signing for Apple platforms"
 arch=("x86_64")
 url="https://github.com/indygreg/apple-platform-rs"
@@ -30,6 +30,7 @@ package() {
 	(cd apple-platform-rs/"${pkgname}" && cargo install \
 		--path . \
 		--root="${pkgdir}"/usr \
+		--no-track \
 		--profile release \
 		--bin rcodesign
 	)

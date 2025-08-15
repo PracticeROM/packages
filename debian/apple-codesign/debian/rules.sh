@@ -1,6 +1,6 @@
 pkgname="apple-codesign"
 pkgver=0.29.0
-pkgrel=1
+pkgrel=2
 url="https://github.com/indygreg/apple-platform-rs"
 
 export CARGO_HOME="${PWD}"/.cargo
@@ -67,6 +67,7 @@ binary-arch() {
 		--config "target.${target}.linker='${host}-gcc'" \
 		--target ${target} \
 		--root="${pkgdir}"/usr \
+		--no-track \
 		--profile release \
 		--bin rcodesign
 	)
