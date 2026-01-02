@@ -1,7 +1,7 @@
 # Maintainer: glank <glank@practicerom.com>
 
 _commit="0279cc9"
-_binutils_ver=2.45
+_binutils_ver=2.45.1
 _gcc_ver=15.2.0
 _newlib_ver=4.5.0.20241231
 _gdb_ver=16.3
@@ -129,7 +129,7 @@ package_powerpc-eabi-gdb() {
 		"bash"
 		"expat"
 		"gcc-libs"
-		"gdb-common=${_gdb_ver}"
+		"gdb-common"
 		"glibc"
 		"guile"
 		"libelf"
