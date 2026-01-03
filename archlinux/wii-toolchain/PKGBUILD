@@ -14,7 +14,7 @@ pkgname=(
 	"powerpc-eabi-newlib"
 	"powerpc-eabi-gdb"
 )
-pkgver=0
+pkgver=r3.0279cc9
 pkgrel=2
 arch=("x86_64")
 url="https://github.com/PracticeROM/wii-toolchain"

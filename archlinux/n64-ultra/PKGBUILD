@@ -16,7 +16,7 @@ pkgname=(
 	"mips64-ultra-elf-practicerom-libs"
 	"practicerom-tools"
 )
-pkgver=0
+pkgver=r225.be7ccd0
 pkgrel=2
 arch=("x86_64")
 url="https://github.com/glankk/n64"
