@@ -1,8 +1,8 @@
-_commit="0279cc9"
-_binutils_ver=2.45
+_commit="3e54efa"
+_binutils_ver=2.45.1
 _gcc_ver=15.2.0
-_newlib_ver=4.5.0.20241231
-_gdb_ver=16.3
+_newlib_ver=4.6.0.20260123
+_gdb_ver=17.1
 
 pkgname_arch=(
 	"powerpc-eabi-binutils"
@@ -13,7 +13,7 @@ pkgname_indep=(
 	"powerpc-eabi-gcc-libs"
 	"powerpc-eabi-newlib"
 )
-pkgrel=2
+pkgrel=1
 url="https://github.com/PracticeROM/wii-toolchain"
 
 pkgver() {

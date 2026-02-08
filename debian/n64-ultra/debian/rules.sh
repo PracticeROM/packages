@@ -1,8 +1,8 @@
-_commit="e13a7ec"
-_binutils_ver=2.45
+_commit="fadb9fa"
+_binutils_ver=2.45.1
 _gcc_ver=15.2.0
-_newlib_ver=4.5.0.20241231
-_gdb_ver=16.3
+_newlib_ver=4.6.0.20260123
+_gdb_ver=17.1
 
 pkgname_arch=(
 	"mips64-ultra-elf-binutils"

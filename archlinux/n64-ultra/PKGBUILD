@@ -1,10 +1,10 @@
 # Maintainer: glank <glank@practicerom.com>
 
-_commit="e13a7ec"
+_commit="fadb9fa"
 _binutils_ver=2.45.1
 _gcc_ver=15.2.0
-_newlib_ver=4.5.0.20241231
-_gdb_ver=16.3
+_newlib_ver=4.6.0.20260123
+_gdb_ver=17.1
 
 pkgbase="n64-ultra"
 pkgname=(
@@ -16,8 +16,8 @@ pkgname=(
 	"mips64-ultra-elf-practicerom-libs"
 	"practicerom-tools"
 )
-pkgver=r225.be7ccd0
-pkgrel=2
+pkgver=0
+pkgrel=1
 arch=("x86_64")
 url="https://github.com/glankk/n64"
 groups=("practicerom-dev")
