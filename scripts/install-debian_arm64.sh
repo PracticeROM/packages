@@ -3,7 +3,7 @@ set -e
 
 install_repository() {
 	pkg_url="http://practicerom.com/public/packages/debian"
-	gpg_url="https://practicerom.com/public/packages/debian/practicerom-archive-keyring.gpg"
+	gpg_url="https://practicerom.com/public/packages/debian/practicerom-archive-keyring.asc"
 	gpg_key="/usr/share/keyrings/practicerom-archive-keyring.gpg"
 	arch="all,arm64"
 	dist="stable"
