@@ -43,7 +43,7 @@ run them manually.*
 
 ## Debian (Ubuntu, WSL)
 1.  Run one of the following to install the package repository for your
-    architecture (requires `curl`):
+    architecture (requires `curl` and `gpg`):
     -   amd64
         ```
         sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-debian_amd64.sh)"
