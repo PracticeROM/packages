@@ -21,6 +21,7 @@ install_conf() {
 	# Remove legacy install method
 	sed -i '\#^\[practicerom\]$#d' /etc/pacman.conf
 	sed -i '\#^Server = http://practicerom.com/public/packages/archlinux$#d' /etc/pacman.conf
+	sed -i '\#^Server = https://practicerom.com/public/packages/archlinux$#d' /etc/pacman.conf
 
 	echo "${conf_line}" >> /etc/pacman.conf
 }
