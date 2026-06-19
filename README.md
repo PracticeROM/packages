@@ -40,31 +40,24 @@ List of upstream repositories and corresponding binary packages
 # Installation
 ## Debian (Ubuntu, WSL)
 1.  Download and install the practicerom repository package for your
-    architecture (requires `curl` if done with the scripts below):
-    -   amd64 ([package link](https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_amd64.deb)):
-        ```
-        curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_amd64.deb
-        sudo dpkg -i practicerom-repository_latest_amd64.deb
-        sudo apt update
-        ```
-    -   arm64 ([package link](https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_arm64.deb)):
-        ```
-        curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_arm64.deb
-        sudo dpkg -i practicerom-repository_latest_arm64.deb
-        sudo apt update
-        ```
+    architecture:
+    ```
+    curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_$(dpkg-architecture -q DEB_HOST_ARCH).deb
+    sudo dpkg -i practicerom-repository_latest_$(dpkg-architecture -q DEB_HOST_ARCH).deb
+    sudo apt update
+    ```
 2.  Install individual packages by running e.g.
     `sudo apt install mips64-ultra-elf-gcc`, or install all practicerom
     development packages with the `practicerom-dev` metapackge:
     `sudo apt install practicerom-dev`.
 
 ## Arch Linux
-1.  Run the following to install the package repository:
+1.  Download and install the practicerom repository package:
     ```
-    sudo pacman -U https://practicerom.com/public/packages/archlinux/practicerom-repository-latest-x86_64.pkg
+    curl -O https://practicerom.com/public/packages/archlinux/practicerom-repository-latest-x86_64.pkg
+    sudo pacman -U practicerom-repository-latest-x86_64.pkg
     sudo pacman -Sy
     ```
-
 2.  Install individual packages with e.g. `sudo pacman -S mips64-ultra-elf-gcc`,
     or select practicerom development packages from the `practicerom-dev`
     group: `sudo pacman -S practicerom-dev`.
