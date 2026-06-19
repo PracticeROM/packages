@@ -41,15 +41,15 @@ List of upstream repositories and corresponding binary packages
 ## Debian (Ubuntu, WSL)
 1.  Download and install the practicerom repository package for your
     architecture (requires `curl` if done with the scripts below):
-    -   amd64 ([package link](https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_amd64.deb)):
+    -   amd64 ([package link](https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_amd64.deb)):
         ```
-        curl -O https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_amd64.deb
+        curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_amd64.deb
         sudo dpkg -i practicerom-repository_latest_amd64.deb
         sudo apt update
         ```
-    -   arm64 ([package link](https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_arm64.deb)):
+    -   arm64 ([package link](https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_arm64.deb)):
         ```
-        curl -O https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_arm64.deb
+        curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_arm64.deb
         sudo dpkg -i practicerom-repository_latest_arm64.deb
         sudo apt update
         ```
