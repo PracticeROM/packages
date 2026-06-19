@@ -1,0 +1,44 @@
+key_file=/usr/share/pacman/keyrings/practicerom.gpg
+conf_file=/etc/pacman.d/practicerom.conf
+conf_line="Include = ${conf_file}"
+
+get_keyid() {
+	gpg --with-colons --with-fingerprint --show-key "${key_file}" |
+		awk -F: '$1=="fpr" {print($10)}' |
+		head -n 1
+}
+
+install_key() {
+	pacman-key --add "${key_file}"
+	pacman-key --lsign "$(get_keyid)"
+}
+
+remove_key() {
+	pacman-key --delete "$(get_keyid)"
+}
+
+install_conf() {
+	# Remove legacy install method
+	sed -i '\#^\[practicerom\]$#d' /etc/pacman.conf
+	sed -i '\#^Server = http://practicerom.com/public/packages/archlinux$#d' /etc/pacman.conf
+
+	echo "${conf_line}" >> /etc/pacman.conf
+}
+
+remove_conf() {
+	sed -i '\#^'"${conf_line}"'$#d' /etc/pacman.conf
+}
+
+post_upgrade() {
+	install_key
+}
+
+post_install() {
+	install_key
+	install_conf
+}
+
+pre_remove() {
+	remove_conf
+	remove_key
+}

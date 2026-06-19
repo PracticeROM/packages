@@ -1,0 +1,6 @@
+Types: deb
+URIs: https://practicerom.com/public/packages/debian
+Suites: stable
+Components: main
+Architectures: all arm64
+Signed-By: /usr/share/keyrings/practicerom-archive-keyring.gpg

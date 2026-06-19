@@ -27,6 +27,7 @@ List of upstream repositories and corresponding binary packages
     -   `gzinject`
 
 -   https://github.com/PracticeROM/packages
+    -   `practicerom-repository`
     -   `practicerom-dev` (Debian)
 
 -   https://github.com/glankk/libdmg-hfsplus
@@ -37,20 +38,20 @@ List of upstream repositories and corresponding binary packages
 </details>
 
 # Installation
-*Piping downloaded scripts directly into a root shell is dangerous. To be safe,
-download and inspect installation scripts from the scripts directory and then
-run them manually.*
-
 ## Debian (Ubuntu, WSL)
-1.  Run one of the following to install the package repository for your
-    architecture (requires `curl` and `gpg`):
-    -   amd64
+1.  Download and install the practicerom repository package for your
+    architecture (requires `curl` if done with the scripts below):
+    -   amd64 ([package link](https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_amd64.deb)):
         ```
-        sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-debian_amd64.sh)"
+        curl -O https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_amd64.deb
+        sudo dpkg -i practicerom-repository_latest_amd64.deb
+        sudo apt update
         ```
-    -   arm64
+    -   arm64 ([package link](https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_arm64.deb)):
         ```
-        sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-debian_arm64.sh)"
+        curl -O https://practicerom.com/public/debian/dists/stable/practicerom-repository_latest_arm64.deb
+        sudo dpkg -i practicerom-repository_latest_arm64.deb
+        sudo apt update
         ```
 2.  Install individual packages by running e.g.
     `sudo apt install mips64-ultra-elf-gcc`, or install all practicerom
@@ -58,9 +59,10 @@ run them manually.*
     `sudo apt install practicerom-dev`.
 
 ## Arch Linux
-1.  Run the following to install the package repository (requires `curl`):
+1.  Run the following to install the package repository:
     ```
-    sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/PracticeROM/packages/HEAD/scripts/install-archlinux.sh)"
+    sudo pacman -U https://practicerom.com/public/packages/archlinux/practicerom-repository-latest-x86_64.pkg
+    sudo pacman -Sy
     ```
 
 2.  Install individual packages with e.g. `sudo pacman -S mips64-ultra-elf-gcc`,

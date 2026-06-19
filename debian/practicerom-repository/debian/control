@@ -1,0 +1,13 @@
+Source: practicerom-repository
+Maintainer: glank <glank@practicerom.com>
+Section: admin
+Priority: optional
+Standards-Version: 4.5.1
+Homepage: https://github.com/PracticeROM/packages
+
+Package: practicerom-repository
+Architecture: any
+Section: admin
+Priority: optional
+Description: PracticeROM package repository
+Homepage: https://github.com/PracticeROM/packages

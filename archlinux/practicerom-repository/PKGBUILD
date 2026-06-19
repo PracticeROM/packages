@@ -1,0 +1,26 @@
+# Maintainer: glank <glank@practicerom.com>
+
+pkgname="practicerom-repository"
+pkgver=1
+pkgrel=1
+pkgdesc="PracticeROM package repository"
+arch=("x86_64")
+license=("GPL-3.0-or-later")
+source=(
+	"practicerom.conf"
+	"practicerom.gpg"
+)
+sha256sums=(
+	"SKIP"
+	"SKIP"
+)
+
+package() {
+	install="${pkgname}".install
+
+	mkdir -p "${pkgdir}"/etc/pacman.d/
+	mkdir -p "${pkgdir}"/usr/share/pacman/keyrings/
+
+	cp "${srcdir}"/practicerom.conf "${pkgdir}"/etc/pacman.d/
+	cp "${srcdir}"/practicerom.gpg "${pkgdir}"/usr/share/pacman/keyrings
+}
