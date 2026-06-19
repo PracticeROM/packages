@@ -42,8 +42,8 @@ List of upstream repositories and corresponding binary packages
 1.  Download and install the practicerom repository package for your
     architecture (requires `curl`):
     ```
-    curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_$(dpkg-architecture -q DEB_HOST_ARCH).deb
-    sudo dpkg -i practicerom-repository_latest_$(dpkg-architecture -q DEB_HOST_ARCH).deb
+    curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_$(dpkg --print-architecture).deb
+    sudo dpkg -i practicerom-repository_latest_$(dpkg --print-architecture).deb
     sudo apt update
     ```
 2.  Install individual packages by running e.g.
