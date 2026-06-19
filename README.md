@@ -40,7 +40,7 @@ List of upstream repositories and corresponding binary packages
 # Installation
 ## Debian (Ubuntu, WSL)
 1.  Download and install the practicerom repository package for your
-    architecture:
+    architecture (requires `curl`):
     ```
     curl -O https://practicerom.com/public/packages/debian/dists/stable/practicerom-repository_latest_$(dpkg-architecture -q DEB_HOST_ARCH).deb
     sudo dpkg -i practicerom-repository_latest_$(dpkg-architecture -q DEB_HOST_ARCH).deb
@@ -52,7 +52,7 @@ List of upstream repositories and corresponding binary packages
     `sudo apt install practicerom-dev`.
 
 ## Arch Linux
-1.  Download and install the practicerom repository package:
+1.  Download and install the practicerom repository package (requires `curl`):
     ```
     curl -O https://practicerom.com/public/packages/archlinux/practicerom-repository-latest-x86_64.pkg
     sudo pacman -U practicerom-repository-latest-x86_64.pkg
